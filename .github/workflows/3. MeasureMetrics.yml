@@ -1,4 +1,4 @@
-name: Code Metrics Analysis
+name: Enhanced Code Metrics Analysis
 
 on:
   push:
@@ -14,42 +14,65 @@ jobs:
     steps:
     - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Required for proper analysis
+        fetch-depth: 0
     
-    # Python setup for analysis tools
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.x'
     
-    # Install analysis tools
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install radon lizard
+        pip install radon lizard pylint mccabe xenon pycodestyle cognitive_complexity wily
     
-    # Analyze code complexity using Radon
+    # Basic metrics with Radon
     - name: Analyze with Radon
       run: |
-        echo "=== Cyclomatic Complexity ==="
-        radon cc . -a -s
-        echo "=== Maintainability Index ==="
-        radon mi . -s
-        echo "=== Raw Metrics (LOC, SLOC, etc) ==="
-        radon raw . -s
+        echo "=== Cyclomatic Complexity ===" > metrics_report.txt
+        radon cc . -a -s >> metrics_report.txt
+        echo -e "\n=== Maintainability Index ===" >> metrics_report.txt
+        radon mi . -s >> metrics_report.txt
+        echo -e "\n=== Raw Metrics ===" >> metrics_report.txt
+        radon raw . -s >> metrics_report.txt
+        echo -e "\n=== Halstead Metrics ===" >> metrics_report.txt
+        radon hal . -s >> metrics_report.txt
     
-    # Analyze with Lizard for additional metrics
+    # Extended metrics with Lizard
     - name: Analyze with Lizard
       run: |
-        lizard . --CCN 10 --length 100 --arguments 5
+        echo -e "\n=== Detailed Code Metrics ===" >> metrics_report.txt
+        lizard . --CCN 10 --length 100 --arguments 5 --extension duplicate >> metrics_report.txt
     
-    # Optional: Store results as artifacts
-    - name: Generate detailed report
+    # Code quality metrics with Pylint
+    - name: Analyze with Pylint
+      run: |
+        echo -e "\n=== Code Quality Metrics ===" >> metrics_report.txt
+        pylint --output-format=text . || true >> metrics_report.txt
+    
+    # Cognitive Complexity
+    - name: Analyze Cognitive Complexity
+      run: |
+        echo -e "\n=== Cognitive Complexity ===" >> metrics_report.txt
+        cognitive_complexity . >> metrics_report.txt
+    
+    # Historical metrics with Wily
+    - name: Analyze with Wily
+      run: |
+        wily build .
+        echo -e "\n=== Code Evolution Metrics ===" >> metrics_report.txt
+        wily report . >> metrics_report.txt
+    
+    # Generate detailed report in multiple formats
+    - name: Generate detailed reports
       run: |
         mkdir -p metrics
+        # JSON reports
         radon cc . -a -s --json > metrics/complexity.json
         radon raw . --json > metrics/raw_metrics.json
+        radon hal . --json > metrics/halstead.json
         lizard . --xml > metrics/lizard_report.xml
+        cp metrics_report.txt metrics/full_report.txt
     
     - name: Upload metrics results
       uses: actions/upload-artifact@v4
