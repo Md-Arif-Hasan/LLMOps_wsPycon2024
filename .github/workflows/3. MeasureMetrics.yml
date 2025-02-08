@@ -54,10 +54,10 @@ jobs:
         pylint --output-format=text . || true >> metrics_report.txt
     
     # Cognitive Complexity Analysis
-    - name: Analyze Cognitive Complexity
-      run: |
-        echo -e "\n=== Cognitive Complexity ===" >> metrics_report.txt
-        cognitive-complexity . >> metrics_report.txt
+    # - name: Analyze Cognitive Complexity
+    #   run: |
+    #     echo -e "\n=== Cognitive Complexity ===" >> metrics_report.txt
+    #     cognitive-complexity . >> metrics_report.txt
     
     # CLOC for detailed line counts
     - name: Run CLOC Analysis
