@@ -52,7 +52,7 @@ jobs:
         lizard . --xml > metrics/lizard_report.xml
     
     - name: Upload metrics results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: code-metrics
         path: metrics/
