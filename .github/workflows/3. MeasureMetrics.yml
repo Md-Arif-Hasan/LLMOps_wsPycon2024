@@ -1,4 +1,4 @@
-name: Enhanced Code Metrics Analysis
+name: Comprehensive Code Metrics Analysis
 
 on:
   push:
@@ -24,25 +24,28 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install radon lizard pylint mccabe xenon pycodestyle cognitive_complexity wily
+        pip install radon lizard pylint mccabe xenon pycodestyle cognitive-complexity cloc scc
     
     # Basic metrics with Radon
     - name: Analyze with Radon
       run: |
         echo "=== Cyclomatic Complexity ===" > metrics_report.txt
-        radon cc -s . >> metrics_report.txt
+        radon cc . --show-complexity --average >> metrics_report.txt
+        
         echo -e "\n=== Maintainability Index ===" >> metrics_report.txt
-        radon mi -s . >> metrics_report.txt
+        radon mi . --show >> metrics_report.txt
+        
         echo -e "\n=== Raw Metrics ===" >> metrics_report.txt
-        radon raw -s . >> metrics_report.txt
+        radon raw . --summary >> metrics_report.txt
+        
         echo -e "\n=== Halstead Metrics ===" >> metrics_report.txt
-        radon hal -s . >> metrics_report.txt
+        radon hal . >> metrics_report.txt
     
     # Extended metrics with Lizard
     - name: Analyze with Lizard
       run: |
         echo -e "\n=== Detailed Code Metrics ===" >> metrics_report.txt
-        lizard . --CCN 10 --length 100 --arguments 5 --extension duplicate >> metrics_report.txt
+        lizard . --CCN 10 --length 100 --arguments 5 --extension duplicate --modified --working_threads 1 >> metrics_report.txt
     
     # Code quality metrics with Pylint
     - name: Analyze with Pylint
@@ -50,27 +53,39 @@ jobs:
         echo -e "\n=== Code Quality Metrics ===" >> metrics_report.txt
         pylint --output-format=text . || true >> metrics_report.txt
     
-    # Cognitive Complexity
+    # Cognitive Complexity Analysis
     - name: Analyze Cognitive Complexity
       run: |
         echo -e "\n=== Cognitive Complexity ===" >> metrics_report.txt
-        cognitive_complexity . >> metrics_report.txt
+        cognitive-complexity . >> metrics_report.txt
     
-    # Historical metrics with Wily
-    - name: Analyze with Wily
+    # CLOC for detailed line counts
+    - name: Run CLOC Analysis
       run: |
-        wily build .
-        echo -e "\n=== Code Evolution Metrics ===" >> metrics_report.txt
-        wily report . >> metrics_report.txt
+        echo -e "\n=== CLOC Analysis ===" >> metrics_report.txt
+        cloc . --by-file --xml --out=metrics/cloc.xml
+        cloc . --by-file >> metrics_report.txt
+    
+    # SCC for additional complexity metrics
+    - name: Run SCC Analysis
+      run: |
+        echo -e "\n=== SCC Analysis ===" >> metrics_report.txt
+        scc . >> metrics_report.txt
+    
+    # Xenon for threshold checking
+    - name: Check complexity thresholds with Xenon
+      run: |
+        echo -e "\n=== Complexity Thresholds ===" >> metrics_report.txt
+        xenon --max-absolute A --max-modules A --max-average A . || true >> metrics_report.txt
     
     # Generate detailed report in multiple formats
     - name: Generate detailed reports
       run: |
         mkdir -p metrics
         # JSON reports
-        radon cc -s . --json > metrics/complexity.json
+        radon cc . --json > metrics/complexity.json
         radon raw . --json > metrics/raw_metrics.json
-        radon hal -s . --json > metrics/halstead.json
+        radon hal . --json > metrics/halstead.json
         lizard . --xml > metrics/lizard_report.xml
         cp metrics_report.txt metrics/full_report.txt
     
