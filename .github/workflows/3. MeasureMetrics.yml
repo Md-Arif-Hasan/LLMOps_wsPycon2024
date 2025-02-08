@@ -67,10 +67,10 @@ jobs:
     #     cloc . --by-file >> metrics_report.txt
     
     # SCC for additional complexity metrics
-    - name: Run SCC Analysis
-      run: |
-        echo -e "\n=== SCC Analysis ===" >> metrics_report.txt
-        scc . >> metrics_report.txt
+    # - name: Run SCC Analysis
+    #   run: |
+    #     echo -e "\n=== SCC Analysis ===" >> metrics_report.txt
+    #     scc . >> metrics_report.txt
     
     # Xenon for threshold checking
     - name: Check complexity thresholds with Xenon
