@@ -30,13 +30,13 @@ jobs:
     - name: Analyze with Radon
       run: |
         echo "=== Cyclomatic Complexity ===" > metrics_report.txt
-        radon cc . -a -s >> metrics_report.txt
+        radon cc -s . >> metrics_report.txt
         echo -e "\n=== Maintainability Index ===" >> metrics_report.txt
-        radon mi . -s >> metrics_report.txt
+        radon mi -s . >> metrics_report.txt
         echo -e "\n=== Raw Metrics ===" >> metrics_report.txt
-        radon raw . -s >> metrics_report.txt
+        radon raw -s . >> metrics_report.txt
         echo -e "\n=== Halstead Metrics ===" >> metrics_report.txt
-        radon hal . -s >> metrics_report.txt
+        radon hal -s . >> metrics_report.txt
     
     # Extended metrics with Lizard
     - name: Analyze with Lizard
@@ -68,9 +68,9 @@ jobs:
       run: |
         mkdir -p metrics
         # JSON reports
-        radon cc . -a -s --json > metrics/complexity.json
+        radon cc -s . --json > metrics/complexity.json
         radon raw . --json > metrics/raw_metrics.json
-        radon hal . --json > metrics/halstead.json
+        radon hal -s . --json > metrics/halstead.json
         lizard . --xml > metrics/lizard_report.xml
         cp metrics_report.txt metrics/full_report.txt
     
